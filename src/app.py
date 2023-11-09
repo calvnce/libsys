@@ -1,7 +1,8 @@
-from flask import Flask, redirect, render_template, request, jsonify, url_for
+from flask import Flask, redirect, render_template, request, jsonify, session, url_for
 from flask_mysqldb import MySQL
 from data.db import Database
 from werkzeug.exceptions import HTTPException
+from models.employee import Employee
 
 from views.loginform import LogInForm
 
@@ -18,14 +19,19 @@ db = Database(mysql)
 ERROR_PAGE = "error.html"
 
 
-@app.route("/")
-@app.route("/books")
+@app.route("/", methods=["GET", "POST"])
+@app.route("/books", methods=["GET", "POST"])
 def index():
-    # Details of authenticated user
-    user = request.args.get("user")
+    # Retrieve the user information from the session
+    user: dict = session.get("user")
     # Fetch all books from database
     books = db.fetch_all_books()
-    
+
+    # Handle search form submission
+    query = request.args.get("query")
+    if query:
+        books = search_books(books, query)
+
     return render_template("index.html", books=books, user=user)
 
 
@@ -49,14 +55,14 @@ def fines():
 def login():
     form = LogInForm()
     if request.method == "POST" and form.validate_on_submit():
-        username = form.username.data
-        password = form.password.data
+        user = db.auth(username=form.username.data, password=form.password.data)
 
-        # Confirm from Database
-        if username == "calvnce" and password == "kolly2012":
-            user = "calvince"
-            # Successful login, redirect to a protected page
-            return redirect(url_for("index", user=user))
+        # Check if user authentication was successful
+        if user is not None:
+            # Store user information in the session
+            session["user"] = {"name": user.first_name, "id": user.id}
+            # Redirect to a protected page (e.g., index)
+            return redirect(url_for("index"))
 
         form.errors["auth"] = "Invalid username or password"
         return render_template("login.html", form=form)
@@ -67,6 +73,7 @@ def login():
 # Route to render the login form
 @app.route("/logout", methods=["GET"])
 def logout():
+    session.popitem("user")
     return redirect(url_for("index"))
 
 
@@ -87,6 +94,17 @@ def handle_error(error):
 @app.route("/not_found")
 def not_found():
     raise HTTPException("Resource not found", code=404)
+
+
+def search_books(books, query):
+    results = []
+    for book in books:
+        if (
+            query.lower() in book.title.lower()
+            or query.lower() in book.author_name.lower()
+        ):
+            results.append(book)
+    return results
 
 
 if __name__ == "__main__":

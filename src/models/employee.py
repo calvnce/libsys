@@ -1,13 +1,13 @@
 class Employee:
     def __init__(
         self,
-        id: str,
-        fname: str,
-        lname: str,
-        gender: str,
-        address: str,
-        email: str,
-        phone: str,
+        id: str = None,
+        fname: str = None,
+        lname: str = None,
+        gender: str = None,
+        address: str = None,
+        email: str = None,
+        phone: str = None,
     ) -> None:
         """
         Employee class represents an employee in the organization.

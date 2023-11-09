@@ -1,26 +1,33 @@
 from flask_mysqldb import MySQL
 
 from models.book import Books
+from models.employee import Employee
 
 
 class Database:
     def __init__(self, db: MySQL = None) -> None:
         self.db = db
 
-    def seed(self):
+    def auth(self, username: str, password: str):
         sql = """
-
+            SELECT e.id, e.first_name, e.last_name
+            FROM Employees e
+            INNER JOIN Accounts a ON e.id = a.employee_id
+            WHERE a.username = %s AND a.password = %s;
         """
-        cursor = self.db.connection.cursor()
+
         try:
-            # Execute the SQL statements
-            cursor.execute(sql)
+            with self.db.connection.cursor() as cursor:
+                cursor.execute(sql, (username, password))
+                result = cursor.fetchone()
+                if result:
+                    print(result)
+                    return Employee(id=result['id'], fname=result['first_name'], lname=result['last_name'])
+                else:
+                    return None
         except Exception as e:
-            # Handle any exceptions, such as logging the error
-            print(f"Error: {e}")
+            print(f"Error xx: {e}")
             raise Exception(e)
-        finally:
-            cursor.close()
 
     def fetch_all_books(self) -> list:
         sql = """
@@ -40,13 +47,20 @@ class Database:
                 results = cursor.fetchall()
                 books = []
                 for result in results:
-                    _id, isbn, title, category, pub_year, author_name, pub_name = result
-                    book = Books(_id, isbn, title, category, pub_year, author_name, pub_name)
+                    book = Books(
+                        result["id"],
+                        result["isbn"],
+                        result["title"],
+                        result["category"],
+                        result["pub_year"],
+                        result["author_name"],
+                        result["pub_name"],
+                    )
                     books.append(book)
-                return books  
-            
+                    print(book)
+                return books
+
         except Exception as e:
             # Handle any exceptions, such as logging the error
             print(f"Error: {e}")
             raise Exception(e)
-

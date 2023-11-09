@@ -7,3 +7,12 @@ INNER JOIN Books b
 INNER JOIN Authors a
     ON b.author_id=a.id
 ORDER BY b.title;
+
+-- SELECT USER
+SELECT 
+    e.id, e.first_name,e.last_name
+FROM Employees e
+    INNER JOIN Accounts a
+    ON e.id=a.employee_id
+WHERE 
+    a.username='' AND a.password=;
