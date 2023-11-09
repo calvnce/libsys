@@ -1,4 +1,6 @@
 flask
+flask_wtf
+wtforms
 mysqlclient
 flask-mysqldb
 pandas

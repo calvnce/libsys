@@ -1,0 +1,20 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Lato', sans-serif;
+}
+
+.hd {
+    height: 55px;
+    width: 100vw;
+    background-color: #044d50;
+    color: #c4c4c7;
+}
+.navbar-brand a {
+    color: #044d50;
+}
+
+ol {
+    list-style: none;
+}
