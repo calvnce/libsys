@@ -37,17 +37,35 @@ def index():
 
 @app.route("/members")
 def members():
-    return render_template("members.html")
+    # Retrieve the user information from the session
+    user: dict = session.get("user")
+    if user:
+        records = db.fetch_all_members()
+        return render_template("members.html", records=records, user=user)
+    # Redirect to a protected page (e.g., index)
+    return redirect(url_for("login"))
 
 
 @app.route("/borrowings")
 def borrowings():
-    return render_template("borrowings.html")
+    # Retrieve the user information from the session
+    user: dict = session.get("user")
+    if user:
+        records = db.fetch_all_borrowings()
+        return render_template("borrowings.html", records=records, user=user)
+    # Redirect to a protected page (e.g., index)
+    return redirect(url_for("login"))
 
 
 @app.route("/fines")
 def fines():
-    return render_template("fines.html")
+    # Retrieve the user information from the session
+    user: dict = session.get("user")
+    if user:
+        records = db.fetch_all_fines()
+        return render_template("fines.html", records=records, user=user)
+    # Redirect to a protected page (e.g., index)
+    return redirect(url_for("login"))
 
 
 # Route to render the login form
@@ -73,7 +91,9 @@ def login():
 # Route to render the login form
 @app.route("/logout", methods=["GET"])
 def logout():
-    session.popitem("user")
+    # To remove the user object from the session
+    session.pop("user", None)
+
     return redirect(url_for("index"))
 
 
@@ -108,4 +128,4 @@ def search_books(books, query):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=8080)
